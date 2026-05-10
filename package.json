@@ -1,13 +1,12 @@
 {
   "name": "concept2-mcp",
   "version": "0.0.1",
-  "description": "MCP server for the Concept2 logbook — query your rowing workouts and Pete Plan progress from Claude.",
+  "description": "MCP server for the Concept2 logbook — query your rowing workouts from Claude.",
   "keywords": [
     "mcp",
     "model-context-protocol",
     "concept2",
     "rowing",
-    "pete-plan",
     "claude",
     "anthropic",
     "ai-tools"
@@ -23,12 +22,31 @@
   "license": "MIT",
   "author": "Eddy Pechuzal",
   "type": "module",
+  "bin": {
+    "concept2-mcp": "./dist/main.js"
+  },
+  "main": "./dist/main.js",
   "engines": {
     "node": ">=20"
   },
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
-  ]
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
 }

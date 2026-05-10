@@ -1,170 +1,118 @@
-import { z } from 'zod';
-import {
-  GetRecentWorkoutsSchema,
-  GetWorkoutDetailsSchema,
-  GetWorkoutsByDateRangeSchema,
-} from '../schemas';
-import { RowingApi } from '../rowing.api';
+import type { Concept2Api } from '../concept2.api.js';
 
-export async function handleGetRecentWorkouts(args: any, rowingApi: RowingApi) {
+type ToolResult = {
+  content: { type: 'text'; text: string }[];
+  isError?: boolean;
+};
+
+const json = (data: unknown): ToolResult => ({
+  content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+});
+
+const errorResult = (message: string): ToolResult => ({
+  content: [{ type: 'text', text: message }],
+  isError: true,
+});
+
+export async function handleGetUserProfile(
+  _args: unknown,
+  api: Concept2Api,
+): Promise<ToolResult> {
   try {
-    const { limit } = GetRecentWorkoutsSchema.parse(args);
-
-    // Workouts include all entity fields (analytics, petePlan, etc.)
-    const workouts = await rowingApi.getWorkouts({ limit });
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(
-            {
-              count: workouts.length,
-              workouts,
-            },
-            null,
-            2
-          ),
-        },
-      ],
-    };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(
-              {
-                error: 'Invalid input',
-                details: error.issues,
-              },
-              null,
-              2
-            ),
-          },
-        ],
-        isError: true,
-      };
-    }
-    throw error;
+    const user = await api.getCurrentUser();
+    return json(user);
+  } catch (err) {
+    return errorResult((err as Error).message);
   }
 }
 
-export async function handleGetWorkoutDetails(args: any, rowingApi: RowingApi) {
-  let workoutId: number | undefined;
+interface RecentWorkoutsArgs {
+  limit?: number;
+}
+
+export async function handleGetRecentWorkouts(
+  args: unknown,
+  api: Concept2Api,
+): Promise<ToolResult> {
+  const { limit } = (args ?? {}) as RecentWorkoutsArgs;
   try {
-    const parsed = GetWorkoutDetailsSchema.parse(args);
-    workoutId = parsed.workoutId;
-
-    // Workout includes all entity fields (analytics, petePlan, etc.)
-    const workout = await rowingApi.getWorkout(workoutId);
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(workout, null, 2),
-        },
-      ],
-    };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(
-              {
-                error: 'Invalid input',
-                details: error.issues,
-              },
-              null,
-              2
-            ),
-          },
-        ],
-        isError: true,
-      };
-    }
-
-    // Handle 404 gracefully
-    if (error && typeof error === 'object' && 'response' in error) {
-      const axiosError = error as any;
-      if (axiosError.response?.status === 404) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(
-                {
-                  error: 'Workout not found',
-                  workoutId: workoutId,
-                },
-                null,
-                2
-              ),
-            },
-          ],
-          isError: true,
-        };
-      }
-    }
-
-    throw error;
+    const workouts = await api.listResults({ per_page: limit ?? 20 });
+    return json(workouts);
+  } catch (err) {
+    return errorResult((err as Error).message);
   }
 }
 
-export async function handleGetWorkoutsByDateRange(args: any, rowingApi: RowingApi) {
-  try {
-    const { startDate, endDate, type } = GetWorkoutsByDateRangeSchema.parse(args);
+interface DateRangeArgs {
+  from: string;
+  to: string;
+  type?: 'rower' | 'skierg' | 'bike' | 'dynamic' | 'slides';
+  limit?: number;
+}
 
-    // Workouts include all entity fields (analytics, petePlan, etc.)
-    let workouts = await rowingApi.getWorkouts({
-      from: startDate,
-      to: endDate,
+export async function handleGetWorkoutsByDateRange(
+  args: unknown,
+  api: Concept2Api,
+): Promise<ToolResult> {
+  const { from, to, type, limit } = (args ?? {}) as DateRangeArgs;
+  if (!from || !to) {
+    return errorResult('Both `from` and `to` are required (YYYY-MM-DD).');
+  }
+  try {
+    const workouts = await api.listResults({
+      from,
+      to,
+      type,
+      per_page: limit ?? 50,
     });
+    return json(workouts);
+  } catch (err) {
+    return errorResult((err as Error).message);
+  }
+}
 
-    // Client-side type filtering if provided (API may not support it yet)
-    if (type) {
-      workouts = workouts.filter((w: any) => w.type && w.type.toLowerCase() === type.toLowerCase());
-    }
+interface WorkoutIdArgs {
+  workout_id: number;
+}
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(
-            {
-              dateRange: { startDate, endDate },
-              count: workouts.length,
-              workouts,
-            },
-            null,
-            2
-          ),
-        },
-      ],
-    };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(
-              {
-                error: 'Invalid input',
-                details: error.issues,
-              },
-              null,
-              2
-            ),
-          },
-        ],
-        isError: true,
-      };
-    }
-    throw error;
+export async function handleGetWorkoutDetails(
+  args: unknown,
+  api: Concept2Api,
+): Promise<ToolResult> {
+  const { workout_id } = (args ?? {}) as WorkoutIdArgs;
+  if (typeof workout_id !== 'number') {
+    return errorResult('`workout_id` (integer) is required.');
+  }
+  try {
+    const workout = await api.getResult(workout_id);
+    return json(workout);
+  } catch (err) {
+    return errorResult((err as Error).message);
+  }
+}
+
+export async function handleGetStrokeData(
+  args: unknown,
+  api: Concept2Api,
+): Promise<ToolResult> {
+  const { workout_id } = (args ?? {}) as WorkoutIdArgs;
+  if (typeof workout_id !== 'number') {
+    return errorResult('`workout_id` (integer) is required.');
+  }
+  try {
+    const strokes = await api.getStrokeData(workout_id);
+    return json({
+      count: strokes.length,
+      units: {
+        t: 'tenths of seconds',
+        d: 'decimeters',
+        p: 'seconds per 500m',
+        spm: 'strokes per minute',
+        hr: 'beats per minute',
+      },
+      data: strokes,
+    });
+  } catch (err) {
+    return errorResult((err as Error).message);
   }
 }
