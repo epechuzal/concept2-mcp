@@ -1,6 +1,2 @@
-import type { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { workoutTools } from './workout.tools.js';
-
-export const allTools: Tool[] = [...workoutTools];
-
-export { workoutTools };
+export { workoutTools } from './workout.tools.js';
+export type { ToolDefinition } from './workout.tools.js';

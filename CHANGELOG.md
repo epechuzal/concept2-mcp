@@ -36,7 +36,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   get_recent_workouts, get_workout_details). See `scripts/smoke.mjs`.
 - GitHub Actions CI workflow runs typecheck + build on push/PR.
 
-### Known
+### Changed
 
-- The `Server` class from `@modelcontextprotocol/sdk` shows a deprecation
-  warning; migration to `McpServer` is a follow-up.
+- Migrated from the deprecated low-level `Server` class to `McpServer`.
+  Tools are now registered with Zod schemas via `server.registerTool`,
+  which validates arguments before they reach handlers.
+- Bundle size dropped from ~10 KB to ~8.4 KB.
+
+### Tests
+
+- 18 unit tests covering `Concept2Api` (auth header, query string
+  construction, response parsing, 401/403/404/503 error paths, network
+  errors) and `loadToken` (env var precedence, whitespace handling).
+- Tests run via `node --test` through `tsx` (no extra test framework).
+- CI now runs `npm test` on every push and pull request.

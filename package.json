@@ -40,14 +40,17 @@
     "dev": "tsup --watch",
     "start": "node dist/main.js",
     "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/concept2.api.test.ts test/concept2-token.test.ts",
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0"
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "tsup": "^8.0.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.4.0"
   }
 }

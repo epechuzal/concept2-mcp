@@ -5,56 +5,29 @@
  * Set CONCEPT2_API_TOKEN in the environment, or save a token to
  * ~/.config/concept2-mcp/token.
  */
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
 import { Concept2Api } from './concept2.api.js';
 import { loadToken } from './concept2-token.js';
-import { allTools } from './tools/index.js';
-import {
-  handleGetUserProfile,
-  handleGetRecentWorkouts,
-  handleGetWorkoutsByDateRange,
-  handleGetWorkoutDetails,
-  handleGetStrokeData,
-} from './handlers/index.js';
+import { workoutTools } from './tools/index.js';
 
 const api = new Concept2Api();
 
-type ToolResult = {
-  content: { type: 'text'; text: string }[];
-  isError?: boolean;
-};
-
-const handlers: Record<string, (args: unknown, api: Concept2Api) => Promise<ToolResult>> = {
-  get_user_profile: handleGetUserProfile,
-  get_recent_workouts: handleGetRecentWorkouts,
-  get_workouts_by_date_range: handleGetWorkoutsByDateRange,
-  get_workout_details: handleGetWorkoutDetails,
-  get_stroke_data: handleGetStrokeData,
-};
-
-const server = new Server(
-  { name: 'concept2-mcp', version: '0.0.1' },
-  { capabilities: { tools: {} } },
-);
-
-server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: allTools }));
-
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
-  const handler = handlers[name];
-  if (!handler) {
-    return {
-      content: [{ type: 'text', text: `Unknown tool: ${name}` }],
-      isError: true,
-    };
-  }
-  return handler(args, api);
+const server = new McpServer({
+  name: 'concept2-mcp',
+  version: '0.0.1',
 });
+
+for (const tool of workoutTools) {
+  server.registerTool(
+    tool.name,
+    {
+      description: tool.description,
+      inputSchema: tool.inputSchema,
+    },
+    async (args: unknown) => tool.handler(args ?? {}, api),
+  );
+}
 
 async function main(): Promise<void> {
   console.error('=== Concept2 MCP Server starting ===');

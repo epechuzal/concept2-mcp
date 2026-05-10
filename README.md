@@ -71,6 +71,7 @@ npm install
 npm run dev        # tsup watch
 npm run build      # tsup compile
 npm run typecheck  # tsc --noEmit
+npm test           # unit tests (mocked fetch, no network)
 ```
 
 ### Verifying against your account
