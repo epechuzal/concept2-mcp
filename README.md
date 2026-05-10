@@ -1,8 +1,10 @@
 # concept2-mcp
 
-A [Model Context Protocol](https://modelcontextprotocol.io) server that lets Claude (and other MCP-aware AI assistants) read your [Concept2 logbook](https://log.concept2.com) — workouts, stroke data, history.
+[![npm](https://img.shields.io/npm/v/concept2-mcp.svg)](https://www.npmjs.com/package/concept2-mcp)
+[![CI](https://github.com/epechuzal/concept2-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/epechuzal/concept2-mcp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Status:** pre-release. Working toward `0.1.0`.
+A [Model Context Protocol](https://modelcontextprotocol.io) server that lets Claude (and other MCP-aware AI assistants) read your [Concept2 logbook](https://log.concept2.com) — workouts, stroke data, history.
 
 > **Not affiliated with Concept2.** Concept2® is a trademark of Concept2 Inc. This is an unofficial community package.
 
@@ -28,19 +30,9 @@ Without writing scripts.
 
 **Pete Plan support is planned for v0.2.0** (read-only schedule lookups).
 
-## Setup
+## Install + use
 
-1. Generate a personal API token in your Concept2 account:
-   <https://log.concept2.com/developers>
-2. Provide the token to the server. Either:
-   - Set `CONCEPT2_API_TOKEN` in your environment, **or**
-   - Save the token to `~/.config/concept2-mcp/token`
-
-## Usage
-
-### Claude Desktop / Claude Code
-
-Add to your MCP config:
+Add to your Claude Desktop or Claude Code MCP config — no clone or build required:
 
 ```json
 {
@@ -56,13 +48,20 @@ Add to your MCP config:
 }
 ```
 
-### Local development
+Generate the token in your Concept2 account at <https://log.concept2.com/developers>.
 
-```bash
-npm install
-npm run build
-CONCEPT2_API_TOKEN=... node dist/main.js
-```
+### Example questions you can now ask Claude
+
+- "How many meters did I row last month?"
+- "What were my five most recent workouts?"
+- "What was my pace on workout 116329257?"
+- "Show me the stroke data for my last 5k."
+
+### Token alternatives
+
+The server reads the token from, in priority order:
+1. `CONCEPT2_API_TOKEN` env var (preferred; the MCP config above)
+2. `~/.config/concept2-mcp/token` file (if you don't want it in the config)
 
 ## Development
 
