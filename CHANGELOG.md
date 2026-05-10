@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-05-10
+
+First public release.
 
 ### Added
 
@@ -15,38 +17,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with file fallback at `~/.config/concept2-mcp/token`.
 - 5 MCP tools: `get_user_profile`, `get_recent_workouts`,
   `get_workouts_by_date_range`, `get_workout_details`, `get_stroke_data`.
-- `tsup` build pipeline producing a single executable `dist/main.js`.
+- Server registered through the high-level `McpServer` class with Zod input
+  schemas (arguments are validated before reaching handlers).
+- `tsup` build pipeline producing a single executable `dist/main.js`
+  (~8.4 KB).
+- 18 unit tests run with `node --test` via `tsx`. Covers `Concept2Api`
+  (auth header, query string construction, response parsing, 401/403/404/503
+  error paths, network errors) and `loadToken` (env var precedence,
+  whitespace handling).
+- End-to-end smoke test (`scripts/smoke.mjs`) that exercises every tool
+  against the live Concept2 API. Run via `npm run smoke` after `npm run
+  build`.
+- GitHub Actions CI: typecheck + tests + build on every push and pull
+  request.
 
-### Removed
+### Note
 
-- Internal Nx-monorepo couplings from the original copy: `util/logger`,
-  `util/config`, `util/luxon-config`, NestJS `HttpService`, RxJS retry/backoff
-  pipeline. Replaced with native `fetch` and `console.error` logging.
-- Pete Plan tools/schemas — deferred to a follow-up (will return with the
-  static schedule ported in cleaned form, completion-tracking dropped per
-  v0.1.0 scope decision).
-
-### Verified
-
-- `npm install` succeeds (138 packages, no audit warnings).
-- `npm run typecheck` clean.
-- `npm run build` produces a single `dist/main.js` (~10 KB) with shebang.
-- End-to-end smoke test passes against the live Concept2 API: all 5 tools
-  exercised successfully (initialize, tools/list, get_user_profile,
-  get_recent_workouts, get_workout_details). See `scripts/smoke.mjs`.
-- GitHub Actions CI workflow runs typecheck + build on push/PR.
-
-### Changed
-
-- Migrated from the deprecated low-level `Server` class to `McpServer`.
-  Tools are now registered with Zod schemas via `server.registerTool`,
-  which validates arguments before they reach handlers.
-- Bundle size dropped from ~10 KB to ~8.4 KB.
-
-### Tests
-
-- 18 unit tests covering `Concept2Api` (auth header, query string
-  construction, response parsing, 401/403/404/503 error paths, network
-  errors) and `loadToken` (env var precedence, whitespace handling).
-- Tests run via `node --test` through `tsx` (no extra test framework).
-- CI now runs `npm test` on every push and pull request.
+- Pete Plan tools are intentionally deferred to a future release. The
+  static schedule in the original source includes verbatim prose from the
+  Pete Plan blog; it will return in a cleaned form (structure only) in a
+  follow-up version.

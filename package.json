@@ -1,6 +1,6 @@
 {
   "name": "concept2-mcp",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "MCP server for the Concept2 logbook — query your rowing workouts from Claude.",
   "keywords": [
     "mcp",
@@ -23,7 +23,7 @@
   "author": "Eddy Pechuzal",
   "type": "module",
   "bin": {
-    "concept2-mcp": "./dist/main.js"
+    "concept2-mcp": "dist/main.js"
   },
   "main": "./dist/main.js",
   "engines": {

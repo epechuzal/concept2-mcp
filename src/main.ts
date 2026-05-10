@@ -15,7 +15,7 @@ const api = new Concept2Api();
 
 const server = new McpServer({
   name: 'concept2-mcp',
-  version: '0.0.1',
+  version: '0.1.0',
 });
 
 for (const tool of workoutTools) {
