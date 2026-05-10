@@ -31,8 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `npm install` succeeds (138 packages, no audit warnings).
 - `npm run typecheck` clean.
 - `npm run build` produces a single `dist/main.js` (~10 KB) with shebang.
-- Smoke-tested with a fake token: server starts, hits Concept2 `/users/me`,
-  receives a real 401 (auth path verified), and continues to listen on stdio.
+- End-to-end smoke test passes against the live Concept2 API: all 5 tools
+  exercised successfully (initialize, tools/list, get_user_profile,
+  get_recent_workouts, get_workout_details). See `scripts/smoke.mjs`.
+- GitHub Actions CI workflow runs typecheck + build on push/PR.
 
 ### Known
 

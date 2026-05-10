@@ -73,6 +73,25 @@ npm run build      # tsup compile
 npm run typecheck  # tsc --noEmit
 ```
 
+### Verifying against your account
+
+After building, you can run an end-to-end smoke test that exercises
+each tool against the live Concept2 API:
+
+```bash
+npm run build
+CONCEPT2_API_TOKEN=... npm run smoke
+```
+
+The smoke test calls `get_user_profile`, `get_recent_workouts`, and
+`get_workout_details` and prints a brief summary of each response.
+
+## Continuous Integration
+
+GitHub Actions runs typecheck + build on every push and pull request
+([workflow](./.github/workflows/ci.yml)). The smoke test isn't run in
+CI because it requires a real Concept2 token.
+
 ## License
 
 [MIT](./LICENSE)
